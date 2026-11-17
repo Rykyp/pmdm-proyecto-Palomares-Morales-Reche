@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../data/productos_ejemplo.dart';
 import '../models/producto.dart';
-import '../widgets/producto_tile.dart';
+import '../widgets/producto_title.dart';
+import 'detalle_screen.dart';
 
 class CatalogoScreen extends StatefulWidget {
   const CatalogoScreen({super.key});
@@ -19,6 +20,34 @@ class _CatalogoScreenState extends State<CatalogoScreen> {
     _productos = List.from(productosEjemplo);
   }
 
+  void _confirmarBorrado(Producto producto) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Eliminar producto'),
+        content: Text('¿Seguro que deseas eliminar "${producto.nombre}" del catálogo?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () {
+              setState(() {
+                _productos.remove(producto);
+              });
+              Navigator.of(ctx).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('${producto.nombre} eliminado')),
+              );
+            },
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,11 +63,14 @@ class _CatalogoScreenState extends State<CatalogoScreen> {
                 return ProductoTile(
                   producto: producto,
                   onTap: () {
-                    // Pendiente: Navegación a Detalle (Pablo)
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => DetalleScreen(producto: producto),
+                      ),
+                    );
                   },
-                  onLongPress: () {
-                    // Pendiente: Alerta de borrado (Pablo)
-                  },
+                  onLongPress: () => _confirmarBorrado(producto),
                 );
               },
             ),
